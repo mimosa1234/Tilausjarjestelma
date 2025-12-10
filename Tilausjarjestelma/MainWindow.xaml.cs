@@ -34,7 +34,10 @@ namespace Tilausjarjestelma
             PaivitaTuoteCombo();
             PaivitaTuoteKategoriaCombo();
 
+            PaivitaTilausAsiakasCombo();
+            PaivitaTilausTuoteCombo();
         }
+
         private void PaivitaDataGrid(DataGrid grid, string sql)
         {
             using (SqlConnection conn = new SqlConnection(polku))
@@ -112,6 +115,9 @@ namespace Tilausjarjestelma
             });
 
             PaivitaAsiakasLista();
+            PaivitaAsiakasCombo();
+            PaivitaTilausAsiakasCombo();
+
 
             Asiakas_etunimi.Clear();
             Asiakas_sukunimi.Clear();
@@ -164,6 +170,8 @@ namespace Tilausjarjestelma
 
             PaivitaKategoriatLista();
             PaivitaTuoteKategoriaCombo();
+            PaivitaKategoriaCombo();
+            PaivitaTilausTuoteCombo();
 
             Kategoria_nimi.Text = "";
         }
@@ -246,6 +254,8 @@ namespace Tilausjarjestelma
             PaivitaTuoteCombo();
 
             PaivitaTuoteKategoriaCombo();
+            PaivitaTilausTuoteCombo();
+
         }
         private void PaivitaTuoteCombo()
         {
@@ -294,6 +304,145 @@ namespace Tilausjarjestelma
             {
                 MessageBox.Show("Virhe poistettaessa tuotetta: " + ex.Message);
             }
+        }
+
+        private void PaivitaTilausAsiakasCombo()
+        {
+            PaivitaComboBox(
+                LisaaTilaus_asiakas,
+                "SELECT Id, FirstName + ' ' + LastName AS Nimi FROM Customers",
+                "Nimi",
+                "Id"
+            );
+        }
+
+        private void PaivitaTilausTuoteCombo()
+        {
+            PaivitaComboBox(
+                LisaaTuote_tuote,
+                "SELECT Id, Name FROM Products",
+                "Name",
+                "Id"
+            );
+        }
+        private class TilausRivi
+        {
+            public int TuoteId { get; set; }
+            public string Tuote { get; set; } = "";
+            public int Maara { get; set; }
+            public decimal Yksikkohinta { get; set; }
+            public decimal RivinSumma => Yksikkohinta * Maara;
+        }
+
+        private List<TilausRivi> tilausRivit = new List<TilausRivi>();
+
+        private void Lisaa_rivi_Click(object sender, RoutedEventArgs e)
+        {
+            if (LisaaTilaus_asiakas.SelectedValue == null ||
+                LisaaTuote_tuote.SelectedValue == null)
+            {
+                MessageBox.Show("Valitse asiakas ja tuote.");
+                return;
+            }
+
+            if (!int.TryParse(LisaaTuote_maara.Text, out int maara) || maara <= 0)
+            {
+                MessageBox.Show("Määrän pitää olla positiivinen numero.");
+                return;
+            }
+
+            int tuoteId = (int)LisaaTuote_tuote.SelectedValue;
+
+            decimal hinta;
+            using (SqlConnection conn = new SqlConnection(polku))
+            {
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand(
+                    "SELECT Price FROM Products WHERE Id = @id", conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", tuoteId);
+                    hinta = (decimal)cmd.ExecuteScalar();
+                }
+            }
+
+            var row = (DataRowView)LisaaTuote_tuote.SelectedItem;
+            string tuoteNimi = row["Name"].ToString() ?? "";
+
+            tilausRivit.Add(new TilausRivi
+            {
+                TuoteId = tuoteId,
+                Tuote = tuoteNimi,
+                Maara = maara,
+                Yksikkohinta = hinta
+            });
+
+            LisaaTilaus_lista.ItemsSource = null;
+            LisaaTilaus_lista.ItemsSource = tilausRivit;
+
+            LisaaTilaus_asiakas.IsEnabled = false;
+
+            LisaaTuote_maara.Clear();
+            LisaaTuote_tuote.SelectedIndex = -1;
+        }
+
+        private void Luo_tilaus_Click(object sender, RoutedEventArgs e)
+        {
+            if (tilausRivit.Count == 0)
+            {
+                MessageBox.Show("Lisää vähintään yksi rivi.");
+                return;
+            }
+
+            if (LisaaTilaus_asiakas.SelectedValue == null)
+            {
+                MessageBox.Show("Valitse asiakas.");
+                return;
+            }
+
+            int asiakasId = (int)LisaaTilaus_asiakas.SelectedValue;
+            decimal tilauksenSumma = tilausRivit.Sum(r => r.RivinSumma);
+            int uusiTilausId;
+
+            using (SqlConnection conn = new SqlConnection(polku))
+            {
+                conn.Open();
+
+                string orderSql = @"
+                    INSERT INTO Orders (CustomerId, OrderDate, TotalPrice)
+                    OUTPUT INSERTED.OrderId
+                    VALUES (@C, GETDATE(), @Total)";
+
+                using (SqlCommand cmd = new SqlCommand(orderSql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@C", asiakasId);
+                    cmd.Parameters.AddWithValue("@Total", tilauksenSumma);
+                    uusiTilausId = (int)cmd.ExecuteScalar();
+                }
+
+                foreach (var r in tilausRivit)
+                {
+                    string itemSql = @"
+                        INSERT INTO OrderItems (OrderId, ProductId, Quantity, UnitPrice, TotalPrice)
+                        VALUES (@O, @P, @Q, @U, @T)";
+
+                    using (SqlCommand cmd2 = new SqlCommand(itemSql, conn))
+                    {
+                        cmd2.Parameters.AddWithValue("@O", uusiTilausId);
+                        cmd2.Parameters.AddWithValue("@P", r.TuoteId);
+                        cmd2.Parameters.AddWithValue("@Q", r.Maara);
+                        cmd2.Parameters.AddWithValue("@U", r.Yksikkohinta);
+                        cmd2.Parameters.AddWithValue("@T", r.RivinSumma);
+                        cmd2.ExecuteNonQuery();
+                    }
+                }
+            }
+
+            MessageBox.Show("Tilaus luotu!");
+
+            tilausRivit.Clear();
+            LisaaTilaus_lista.ItemsSource = null;
+            LisaaTilaus_asiakas.IsEnabled = true;
+            LisaaTilaus_asiakas.SelectedIndex = -1;
         }
 
 

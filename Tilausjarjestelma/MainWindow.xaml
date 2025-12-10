@@ -69,9 +69,9 @@
                     <ComboBox x:Name="LisaaTuote_tuote" HorizontalAlignment="Left" Margin="150,110,0,0" VerticalAlignment="Top" Width="120"/>
                     <Label Content="Määrä" HorizontalAlignment="Left" Margin="30,150,0,0" VerticalAlignment="Top"/>
                     <TextBox x:Name="LisaaTuote_maara" HorizontalAlignment="Left" Margin="150,150,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="120"/>
-                    <Button x:Name="Lisaa_rivi" Content="Lisää rivi" HorizontalAlignment="Left" Margin="186,190,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="Lisaa_rivi" Content="Lisää rivi" HorizontalAlignment="Left" Margin="186,190,0,0" VerticalAlignment="Top" Click="Lisaa_rivi_Click"/>
                     <DataGrid x:Name="LisaaTilaus_lista" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="400,30,30,70"/>
-                    <Button x:Name="Luo_tilaus" Content="Luo tilaus" HorizontalAlignment="Left" Margin="555,360,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="Luo_tilaus" Content="Luo tilaus" HorizontalAlignment="Left" Margin="555,360,0,0" VerticalAlignment="Top" Click="Luo_tilaus_Click"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Poista tilaus">
