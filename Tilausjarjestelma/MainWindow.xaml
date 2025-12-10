@@ -35,8 +35,8 @@
                     <Label Content="Nimi" HorizontalAlignment="Left" Margin="30,70,0,0" VerticalAlignment="Top"/>
                     <Label Content="Kategorian poistaminen:" HorizontalAlignment="Left" Margin="30,150,0,0" VerticalAlignment="Top"/>
                     <ComboBox x:Name="Kategoria_poisto" HorizontalAlignment="Left" Margin="30,190,0,0" VerticalAlignment="Top" Width="120"/>
-                    <Button x:Name="Lisaa_kategoria" Content="Lisää kategoria" HorizontalAlignment="Left" Margin="169,110,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="Poista_kategoria" Content="Poista kategoria" HorizontalAlignment="Left" Margin="169,190,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="Lisaa_kategoria" Content="Lisää kategoria" HorizontalAlignment="Left" Margin="169,110,0,0" VerticalAlignment="Top" Click="Lisaa_kategoria_Click"/>
+                    <Button x:Name="Poista_kategoria" Content="Poista kategoria" HorizontalAlignment="Left" Margin="169,190,0,0" VerticalAlignment="Top" Click="Poista_kategoria_Click"/>
                     <DataGrid x:Name="Kategoriat_lista" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="400,70,30,30"/>
                 </Grid>
             </TabItem>

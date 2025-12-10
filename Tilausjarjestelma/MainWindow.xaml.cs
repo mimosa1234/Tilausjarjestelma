@@ -23,9 +23,12 @@ namespace Tilausjarjestelma
         public MainWindow()
         {
             InitializeComponent();
+
             PaivitaAsiakasLista();
             PaivitaAsiakasCombo();
 
+            PaivitaKategoriatLista();
+            PaivitaKategoriaCombo();
 
         }
         private void PaivitaDataGrid(DataGrid grid, string sql)
@@ -138,6 +141,54 @@ namespace Tilausjarjestelma
             PaivitaAsiakasLista();
             PaivitaAsiakasCombo();
         }
+
+        private void PaivitaKategoriatLista()
+        {
+            PaivitaDataGrid(Kategoriat_lista, "SELECT * FROM Categories");
+        }
+
+        private void Lisaa_kategoria_Click(object sender, RoutedEventArgs e)
+        {
+            string sql = "INSERT INTO Categories (Name) VALUES (@Name)";
+
+            var param = new Dictionary<string, object>()
+            {
+                { "Name", Kategoria_nimi.Text }
+            };
+
+            Lisaa(sql, param);
+
+            PaivitaKategoriatLista();
+            Kategoria_nimi.Text = "";
+        }
+
+        private void PaivitaKategoriaCombo()
+        {
+            PaivitaComboBox(
+                Kategoria_poisto,
+                "SELECT Id, Name FROM Categories",
+                "Name",
+                "Id"
+            );
+        }
+
+        private void Poista_kategoria_Click(object sender, RoutedEventArgs e)
+        {
+            if (Kategoria_poisto.SelectedValue == null)
+            {
+                MessageBox.Show("Valitse poistettava kategoria.");
+                return;
+            }
+
+            int id = (int)Kategoria_poisto.SelectedValue;
+
+            Poista("DELETE FROM Categories WHERE Id = @Id", id);
+
+            PaivitaKategoriatLista();
+            PaivitaKategoriaCombo();
+
+        }
+
 
     }
 }
