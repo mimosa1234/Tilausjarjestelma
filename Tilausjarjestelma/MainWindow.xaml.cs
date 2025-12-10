@@ -36,6 +36,9 @@ namespace Tilausjarjestelma
 
             PaivitaTilausAsiakasCombo();
             PaivitaTilausTuoteCombo();
+
+            PaivitaTilaustenPoistoCombo();
+
         }
 
         private void PaivitaDataGrid(DataGrid grid, string sql)
@@ -439,10 +442,96 @@ namespace Tilausjarjestelma
 
             MessageBox.Show("Tilaus luotu!");
 
+            PaivitaTilaustenPoistoCombo();
+
             tilausRivit.Clear();
             LisaaTilaus_lista.ItemsSource = null;
             LisaaTilaus_asiakas.IsEnabled = true;
             LisaaTilaus_asiakas.SelectedIndex = -1;
+        }
+
+        private void PaivitaTilaustenPoistoCombo()
+        {
+            PaivitaComboBox(
+                TilausPoista_tilaus,
+                "SELECT OrderId FROM Orders",
+                "OrderId",
+                "OrderId"
+            );
+        }
+        private void PaivitaTilausRivit(int orderId)
+        {
+            string sql = $@"
+                SELECT OI.OrderItemId, P.Name AS Tuote, OI.Quantity, OI.UnitPrice, OI.TotalPrice
+                FROM OrderItems OI
+                INNER JOIN Products P ON OI.ProductId = P.Id
+                WHERE OI.OrderId = {orderId}";
+
+            PaivitaDataGrid(PoistaTilaus_lista, sql);
+        }
+        private void TilausPoista_tilaus_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (TilausPoista_tilaus.SelectedValue == null)
+                return;
+
+            int orderId = (int)TilausPoista_tilaus.SelectedValue;
+            PaivitaTilausRivit(orderId);
+        }
+        private void Poista_kokoTilaus_Click(object sender, RoutedEventArgs e)
+        {
+            if (TilausPoista_tilaus.SelectedValue == null)
+            {
+                MessageBox.Show("Valitse poistettava tilaus.");
+                return;
+            }
+
+            int orderId = (int)TilausPoista_tilaus.SelectedValue;
+
+            using (SqlConnection conn = new SqlConnection(polku))
+            {
+                conn.Open();
+
+                SqlCommand cmd1 = new SqlCommand(
+                    "DELETE FROM OrderItems WHERE OrderId = @id", conn);
+                cmd1.Parameters.AddWithValue("@id", orderId);
+                cmd1.ExecuteNonQuery();
+
+                SqlCommand cmd2 = new SqlCommand(
+                    "DELETE FROM Orders WHERE OrderId = @id", conn);
+                cmd2.Parameters.AddWithValue("@id", orderId);
+                cmd2.ExecuteNonQuery();
+            }
+
+            MessageBox.Show("Tilaus poistettu!");
+
+            PaivitaTilaustenPoistoCombo();
+            PoistaTilaus_lista.ItemsSource = null;
+        }
+        private void Poista_rivi_Click(object sender, RoutedEventArgs e)
+        {
+            if (PoistaTilaus_lista.SelectedItem == null)
+            {
+                MessageBox.Show("Valitse poistettava rivi.");
+                return;
+            }
+
+            DataRowView row = (DataRowView)PoistaTilaus_lista.SelectedItem;
+            int orderItemId = (int)row["OrderItemId"];
+
+            using (SqlConnection conn = new SqlConnection(polku))
+            {
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand(
+                    "DELETE FROM OrderItems WHERE OrderItemId = @id", conn);
+                cmd.Parameters.AddWithValue("@id", orderItemId);
+                cmd.ExecuteNonQuery();
+            }
+
+            MessageBox.Show("Rivi poistettu!");
+
+            int orderId = (int)TilausPoista_tilaus.SelectedValue;
+            PaivitaTilausRivit(orderId);
         }
 
 

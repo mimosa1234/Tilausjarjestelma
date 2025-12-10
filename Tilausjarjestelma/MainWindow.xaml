@@ -78,10 +78,10 @@
                 <Grid Background="#FFE5E5E5">
                     <Label Content="Tilauksen poistaminen" HorizontalAlignment="Left" Margin="30,30,0,0" VerticalAlignment="Top"/>
                     <Label Content="Valitse tilaus:" HorizontalAlignment="Left" Margin="30,70,0,0" VerticalAlignment="Top"/>
-                    <ComboBox x:Name="TilausPoista_tilaus" HorizontalAlignment="Left" Margin="150,70,0,0" VerticalAlignment="Top" Width="120"/>
-                    <Button x:Name="Poista_kokoTilaus" Content="Poista koko tilaus" HorizontalAlignment="Left" Margin="162,110,0,0" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="TilausPoista_tilaus" HorizontalAlignment="Left" Margin="150,70,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="TilausPoista_tilaus_SelectionChanged"/>
+                    <Button x:Name="Poista_kokoTilaus" Content="Poista koko tilaus" HorizontalAlignment="Left" Margin="162,110,0,0" VerticalAlignment="Top" Click="Poista_kokoTilaus_Click"/>
                     <Label Content="Valitse ja poista rivi" HorizontalAlignment="Left" Margin="30,150,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="Poista_rivi" Content="Poista rivi" HorizontalAlignment="Left" Margin="162,150,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="Poista_rivi" Content="Poista rivi" HorizontalAlignment="Left" Margin="162,150,0,0" VerticalAlignment="Top" Click="Poista_rivi_Click"/>
                     <DataGrid x:Name="PoistaTilaus_lista" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="400,30,30,30"/>
                 </Grid>
             </TabItem>
