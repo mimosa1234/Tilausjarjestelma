@@ -30,6 +30,10 @@ namespace Tilausjarjestelma
             PaivitaKategoriatLista();
             PaivitaKategoriaCombo();
 
+            PaivitaTuoteLista();
+            PaivitaTuoteCombo();
+            PaivitaTuoteKategoriaCombo();
+
         }
         private void PaivitaDataGrid(DataGrid grid, string sql)
         {
@@ -159,6 +163,8 @@ namespace Tilausjarjestelma
             Lisaa(sql, param);
 
             PaivitaKategoriatLista();
+            PaivitaTuoteKategoriaCombo();
+
             Kategoria_nimi.Text = "";
         }
 
@@ -186,7 +192,108 @@ namespace Tilausjarjestelma
 
             PaivitaKategoriatLista();
             PaivitaKategoriaCombo();
+        }
 
+        private void PaivitaTuoteLista()
+        {
+            PaivitaDataGrid(Tuotteet_lista, "SELECT * FROM Products");
+        }
+        private void Lisaa_tuote_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(Tuotteet_nimi.Text) ||
+                string.IsNullOrWhiteSpace(Tuotteet_hinta.Text) ||
+                string.IsNullOrWhiteSpace(Tuotteet_kuvaus.Text) ||
+                Tuotteet_kategoria.SelectedValue == null ||
+                string.IsNullOrWhiteSpace(Tuotteet_varastosaldo.Text))
+            {
+                MessageBox.Show("Täytä kaikki kentät!");
+                return;
+            }
+
+            if (!decimal.TryParse(Tuotteet_hinta.Text.Replace(",", "."), out decimal hinta))
+            {
+                MessageBox.Show("Virheellinen hinta!");
+                return;
+            }
+
+            if (!int.TryParse(Tuotteet_varastosaldo.Text, out int saldo))
+            {
+                MessageBox.Show("Varastosaldo ei ole numero!");
+                return;
+            }
+
+            string sql = @"INSERT INTO Products (Name, Price, Description, CategoryId, Stock)
+                   VALUES (@N, @P, @D, @C, @S)";
+
+            Lisaa(sql, new Dictionary<string, object>()
+            {
+                { "N", Tuotteet_nimi.Text },
+                { "P", hinta },
+                { "D", Tuotteet_kuvaus.Text },
+                { "C", (int)Tuotteet_kategoria.SelectedValue },
+                { "S", saldo }
+            });
+
+            MessageBox.Show("Tuote lisätty!");
+
+            Tuotteet_nimi.Clear();
+            Tuotteet_hinta.Clear();
+            Tuotteet_kuvaus.Clear();
+            Tuotteet_varastosaldo.Clear();
+            Tuotteet_kategoria.SelectedIndex = -1;
+
+            PaivitaTuoteLista();
+            PaivitaTuoteCombo();
+
+            PaivitaTuoteKategoriaCombo();
+        }
+        private void PaivitaTuoteCombo()
+        {
+            PaivitaComboBox(
+                Tuotteet_poista,
+                "SELECT Id, Name FROM Products",
+                "Name",
+                "Id"
+            );
+        }
+
+        private void PaivitaTuoteKategoriaCombo()
+        {
+            PaivitaComboBox(
+                Tuotteet_kategoria,
+                "SELECT Id, Name FROM Categories",
+                "Name",
+                "Id"
+            );
+        }
+
+
+        private void Poista_tuote_Click(object sender, RoutedEventArgs e)
+        {
+            if (Tuotteet_poista.SelectedValue == null)
+            {
+                MessageBox.Show("Valitse poistettava tuote.");
+                return;
+            }
+
+            int id = (int)Tuotteet_poista.SelectedValue;
+
+            string sql = "DELETE FROM Products WHERE Id = @Id";
+
+            try
+            {
+                Poista(sql, id);
+                MessageBox.Show("Tuote poistettu!");
+
+                PaivitaTuoteLista();
+                PaivitaTuoteCombo();
+                PaivitaTuoteKategoriaCombo();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Virhe poistettaessa tuotetta: " + ex.Message);
+            }
         }
 
 

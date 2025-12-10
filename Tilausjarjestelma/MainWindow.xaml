@@ -53,10 +53,10 @@
                     <ComboBox x:Name="Tuotteet_kategoria" HorizontalAlignment="Left" Margin="150,190,0,0" VerticalAlignment="Top" Width="120"/>
                     <Label Content="Varastosaldo" HorizontalAlignment="Left" Margin="30,230,0,0" VerticalAlignment="Top"/>
                     <TextBox x:Name="Tuotteet_varastosaldo" HorizontalAlignment="Left" Margin="150,230,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="120"/>
-                    <Button x:Name="Lisaa_tuote" Content="Lisää tuote" HorizontalAlignment="Left" Margin="179,270,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="Lisaa_tuote" Content="Lisää tuote" HorizontalAlignment="Left" Margin="179,270,0,0" VerticalAlignment="Top" Click="Lisaa_tuote_Click"/>
                     <Label Content="Tuotteen poistaminen:" HorizontalAlignment="Left" Margin="30,310,0,0" VerticalAlignment="Top"/>
                     <ComboBox x:Name="Tuotteet_poista" HorizontalAlignment="Left" Margin="30,350,0,0" VerticalAlignment="Top" Width="120"/>
-                    <Button x:Name="Poista_tuote" Content="Poista tuote" HorizontalAlignment="Left" Margin="179,350,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="Poista_tuote" Content="Poista tuote" HorizontalAlignment="Left" Margin="179,350,0,0" VerticalAlignment="Top" Click="Poista_tuote_Click"/>
                     <DataGrid x:Name="Tuotteet_lista" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="400,70,30,30"/>
                 </Grid>
             </TabItem>
