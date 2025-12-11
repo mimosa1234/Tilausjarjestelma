@@ -39,6 +39,10 @@ namespace Tilausjarjestelma
 
             PaivitaTilaustenPoistoCombo();
 
+            PaivitaVarastoTuoteCombo();
+            PaivitaVarastosaldoLista();
+
+
         }
 
         private void PaivitaDataGrid(DataGrid grid, string sql)
@@ -258,6 +262,8 @@ namespace Tilausjarjestelma
 
             PaivitaTuoteKategoriaCombo();
             PaivitaTilausTuoteCombo();
+            PaivitaVarastoTuoteCombo();
+            PaivitaVarastosaldoLista();
 
         }
         private void PaivitaTuoteCombo()
@@ -301,7 +307,7 @@ namespace Tilausjarjestelma
                 PaivitaTuoteLista();
                 PaivitaTuoteCombo();
                 PaivitaTuoteKategoriaCombo();
-
+                PaivitaVarastoTuoteCombo();
             }
             catch (Exception ex)
             {
@@ -532,6 +538,116 @@ namespace Tilausjarjestelma
 
             int orderId = (int)TilausPoista_tilaus.SelectedValue;
             PaivitaTilausRivit(orderId);
+        }
+
+        private void PaivitaVarastoTuoteCombo()
+        {
+            PaivitaComboBox(
+                Muokkaa_varastosaldo,
+                "SELECT Id, Name FROM Products",
+                "Name",
+                "Id"
+            );
+        }
+        private void PaivitaVarastosaldoLista()
+        {
+            PaivitaDataGrid(Varastosaldo_lista,
+                "SELECT Id, Name, Stock FROM Products");
+        }
+
+        private void Muokkaa_varastosaldo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (Muokkaa_varastosaldo.SelectedValue == null)
+                return;
+
+            int id = (int)Muokkaa_varastosaldo.SelectedValue;
+
+            using (SqlConnection conn = new SqlConnection(polku))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand(
+                    "SELECT Stock FROM Products WHERE Id = @id", conn);
+                cmd.Parameters.AddWithValue("@id", id);
+
+                int saldo = (int)cmd.ExecuteScalar();
+                NykyinenSaldo_varastosaldo.Text = $"Saldo = {saldo}";
+            }
+        }
+        private void Paivita_saldo_Click(object sender, RoutedEventArgs e)
+        {
+            if (Muokkaa_varastosaldo.SelectedValue == null)
+            {
+                MessageBox.Show("Valitse tuote.");
+                return;
+            }
+
+            if (!int.TryParse(UusiArvo_varastosaldo.Text, out int arvo))
+            {
+                MessageBox.Show("Anna numeroarvo.");
+                return;
+            }
+
+            int id = (int)Muokkaa_varastosaldo.SelectedValue;
+            int nykyinenSaldo;
+
+            using (SqlConnection conn = new SqlConnection(polku))
+            {
+                conn.Open();
+
+                // Hae nykyinen saldo
+                SqlCommand cmd1 = new SqlCommand(
+                    "SELECT Stock FROM Products WHERE Id = @id", conn);
+                cmd1.Parameters.AddWithValue("@id", id);
+                nykyinenSaldo = (int)cmd1.ExecuteScalar();
+            }
+
+            int uusiSaldo = nykyinenSaldo;
+
+            // Päivitystapa
+            if (AsetaUusiSaldo_varastosaldo.IsChecked == true)
+                uusiSaldo = arvo;
+
+            if (LisaaVarastoon_varastosaldo.IsChecked == true)
+                uusiSaldo = nykyinenSaldo + arvo;
+
+            if (VahennaVarastosta_varastosaldo.IsChecked == true)
+            {
+                if (arvo > nykyinenSaldo)
+                {
+                    MessageBox.Show("Saldo ei voi mennä miinukselle!");
+                    return;
+                }
+                uusiSaldo = nykyinenSaldo - arvo;
+            }
+
+            // Tallenna tietokantaan
+            using (SqlConnection conn = new SqlConnection(polku))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand(
+                    "UPDATE Products SET Stock = @s WHERE Id = @id", conn);
+                cmd.Parameters.AddWithValue("@s", uusiSaldo);
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+            }
+
+            MessageBox.Show("Varastosaldo päivitetty!");
+
+            // Päivitä näkymä
+            NykyinenSaldo_varastosaldo.Text = $"Saldo = {uusiSaldo}";
+            PaivitaVarastosaldoLista();
+
+            UusiArvo_varastosaldo.Text = "";
+
+            AsetaUusiSaldo_varastosaldo.IsChecked = false;
+            LisaaVarastoon_varastosaldo.IsChecked = false;
+            VahennaVarastosta_varastosaldo.IsChecked = false;
+
+            NykyinenSaldo_varastosaldo.Text = "Saldo = -";
+
+            Muokkaa_varastosaldo.SelectedIndex = -1;
+
+
         }
 
 
