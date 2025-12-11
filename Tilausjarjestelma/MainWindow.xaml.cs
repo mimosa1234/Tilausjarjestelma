@@ -42,9 +42,12 @@ namespace Tilausjarjestelma
             PaivitaVarastoTuoteCombo();
             PaivitaVarastosaldoLista();
 
-
+            PaivitaLahetysTilausCombo();
         }
 
+        // Yleiset metodit
+
+        // Yleinen metodi datagridin päivittämiseen
         private void PaivitaDataGrid(DataGrid grid, string sql)
         {
             using (SqlConnection conn = new SqlConnection(polku))
@@ -57,6 +60,7 @@ namespace Tilausjarjestelma
             }
         }
 
+        // Yleinen metodi comboboxin päivittämiseen
         private void PaivitaComboBox(ComboBox box, string sql, string display, string value)
         {
             using (SqlConnection conn = new SqlConnection(polku))
@@ -71,7 +75,7 @@ namespace Tilausjarjestelma
                 box.SelectedValuePath = value;
             }
         }
-
+        // Yleinen metodi tietueen lisäämiseen
         private void Lisaa(string sql, Dictionary<string, object> param)
         {
             using (SqlConnection conn = new SqlConnection(polku))
@@ -87,7 +91,7 @@ namespace Tilausjarjestelma
                 }
             }
         }
-
+        // Yleinen metodi tietueen poistamiseen
         private void Poista(string sql, int id)
         {
             using (SqlConnection conn = new SqlConnection(polku))
@@ -101,11 +105,14 @@ namespace Tilausjarjestelma
             }
         }
 
+        // Asiakkaat
+        // Päivitä asiakaslista
         private void PaivitaAsiakasLista()
         {
             PaivitaDataGrid(Asiakkaat_lista, "SELECT * FROM Customers");
         }
 
+        // Lisää asiakas
         private void LisaaAsiakas_Click(object sender, RoutedEventArgs e)
         {
             string sql = @"
@@ -133,6 +140,7 @@ namespace Tilausjarjestelma
             Asiakas_osoite.Clear();
         }
 
+        // Päivitä asiakaskombo
         private void PaivitaAsiakasCombo()
         {
             PaivitaComboBox(
@@ -143,6 +151,7 @@ namespace Tilausjarjestelma
             );
         }
 
+        // Poista asiakas
         private void Poista_asiakas_Click(object sender, RoutedEventArgs e)
         {
             if (Asiakas_poisto.SelectedValue == null)
@@ -159,11 +168,14 @@ namespace Tilausjarjestelma
             PaivitaAsiakasCombo();
         }
 
+        // Kategoriat
+        // Paivita kategoriat lista
         private void PaivitaKategoriatLista()
         {
             PaivitaDataGrid(Kategoriat_lista, "SELECT * FROM Categories");
         }
 
+        // Lisaa kategoria
         private void Lisaa_kategoria_Click(object sender, RoutedEventArgs e)
         {
             string sql = "INSERT INTO Categories (Name) VALUES (@Name)";
@@ -183,6 +195,7 @@ namespace Tilausjarjestelma
             Kategoria_nimi.Text = "";
         }
 
+        // Päivitä kategoria combo
         private void PaivitaKategoriaCombo()
         {
             PaivitaComboBox(
@@ -193,6 +206,7 @@ namespace Tilausjarjestelma
             );
         }
 
+        // Poista kategoria
         private void Poista_kategoria_Click(object sender, RoutedEventArgs e)
         {
             if (Kategoria_poisto.SelectedValue == null)
@@ -209,10 +223,14 @@ namespace Tilausjarjestelma
             PaivitaKategoriaCombo();
         }
 
+        // Tuotteet
+        // Päivitä tuotelista
         private void PaivitaTuoteLista()
         {
             PaivitaDataGrid(Tuotteet_lista, "SELECT * FROM Products");
         }
+
+        // Lisää tuote
         private void Lisaa_tuote_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(Tuotteet_nimi.Text) ||
@@ -249,8 +267,6 @@ namespace Tilausjarjestelma
                 { "S", saldo }
             });
 
-            MessageBox.Show("Tuote lisätty!");
-
             Tuotteet_nimi.Clear();
             Tuotteet_hinta.Clear();
             Tuotteet_kuvaus.Clear();
@@ -266,6 +282,8 @@ namespace Tilausjarjestelma
             PaivitaVarastosaldoLista();
 
         }
+
+        // Päivitä tuotekombo
         private void PaivitaTuoteCombo()
         {
             PaivitaComboBox(
@@ -276,6 +294,7 @@ namespace Tilausjarjestelma
             );
         }
 
+        // Päivitä tuotekategoriakombo
         private void PaivitaTuoteKategoriaCombo()
         {
             PaivitaComboBox(
@@ -286,7 +305,7 @@ namespace Tilausjarjestelma
             );
         }
 
-
+        // Poista tuote
         private void Poista_tuote_Click(object sender, RoutedEventArgs e)
         {
             if (Tuotteet_poista.SelectedValue == null)
@@ -302,7 +321,6 @@ namespace Tilausjarjestelma
             try
             {
                 Poista(sql, id);
-                MessageBox.Show("Tuote poistettu!");
 
                 PaivitaTuoteLista();
                 PaivitaTuoteCombo();
@@ -315,6 +333,8 @@ namespace Tilausjarjestelma
             }
         }
 
+        // Tilaukset
+        // Päivitä tilaus asiakaskombo
         private void PaivitaTilausAsiakasCombo()
         {
             PaivitaComboBox(
@@ -325,6 +345,7 @@ namespace Tilausjarjestelma
             );
         }
 
+        // Päivitä tilaus tuotekombo
         private void PaivitaTilausTuoteCombo()
         {
             PaivitaComboBox(
@@ -345,6 +366,7 @@ namespace Tilausjarjestelma
 
         private List<TilausRivi> tilausRivit = new List<TilausRivi>();
 
+        // Lisää rivi tilaukseen
         private void Lisaa_rivi_Click(object sender, RoutedEventArgs e)
         {
             if (LisaaTilaus_asiakas.SelectedValue == null ||
@@ -394,6 +416,7 @@ namespace Tilausjarjestelma
             LisaaTuote_tuote.SelectedIndex = -1;
         }
 
+        // Luo tilaus
         private void Luo_tilaus_Click(object sender, RoutedEventArgs e)
         {
             if (tilausRivit.Count == 0)
@@ -456,6 +479,7 @@ namespace Tilausjarjestelma
             LisaaTilaus_asiakas.SelectedIndex = -1;
         }
 
+        // Poista tilaus
         private void PaivitaTilaustenPoistoCombo()
         {
             PaivitaComboBox(
@@ -465,6 +489,8 @@ namespace Tilausjarjestelma
                 "OrderId"
             );
         }
+
+        // Päivitä tilauksen rivit
         private void PaivitaTilausRivit(int orderId)
         {
             string sql = $@"
@@ -475,6 +501,8 @@ namespace Tilausjarjestelma
 
             PaivitaDataGrid(PoistaTilaus_lista, sql);
         }
+
+        // Tilausten poisto tapahtumat
         private void TilausPoista_tilaus_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (TilausPoista_tilaus.SelectedValue == null)
@@ -483,6 +511,8 @@ namespace Tilausjarjestelma
             int orderId = (int)TilausPoista_tilaus.SelectedValue;
             PaivitaTilausRivit(orderId);
         }
+
+        // Poista koko tilaus
         private void Poista_kokoTilaus_Click(object sender, RoutedEventArgs e)
         {
             if (TilausPoista_tilaus.SelectedValue == null)
@@ -513,6 +543,8 @@ namespace Tilausjarjestelma
             PaivitaTilaustenPoistoCombo();
             PoistaTilaus_lista.ItemsSource = null;
         }
+
+        // Poista tilauksen rivi
         private void Poista_rivi_Click(object sender, RoutedEventArgs e)
         {
             if (PoistaTilaus_lista.SelectedItem == null)
@@ -540,6 +572,8 @@ namespace Tilausjarjestelma
             PaivitaTilausRivit(orderId);
         }
 
+        // Varastosaldo
+        // Päivitä varastotuotekombo
         private void PaivitaVarastoTuoteCombo()
         {
             PaivitaComboBox(
@@ -549,12 +583,15 @@ namespace Tilausjarjestelma
                 "Id"
             );
         }
+
+        // Päivitä varastosaldo lista
         private void PaivitaVarastosaldoLista()
         {
             PaivitaDataGrid(Varastosaldo_lista,
                 "SELECT Id, Name, Stock FROM Products");
         }
 
+        // Varastosaldon muokkaustapahtumat
         private void Muokkaa_varastosaldo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (Muokkaa_varastosaldo.SelectedValue == null)
@@ -573,6 +610,8 @@ namespace Tilausjarjestelma
                 NykyinenSaldo_varastosaldo.Text = $"Saldo = {saldo}";
             }
         }
+
+        // Päivitä varastosaldo
         private void Paivita_saldo_Click(object sender, RoutedEventArgs e)
         {
             if (Muokkaa_varastosaldo.SelectedValue == null)
@@ -603,7 +642,6 @@ namespace Tilausjarjestelma
 
             int uusiSaldo = nykyinenSaldo;
 
-            // Päivitystapa
             if (AsetaUusiSaldo_varastosaldo.IsChecked == true)
                 uusiSaldo = arvo;
 
@@ -620,7 +658,6 @@ namespace Tilausjarjestelma
                 uusiSaldo = nykyinenSaldo - arvo;
             }
 
-            // Tallenna tietokantaan
             using (SqlConnection conn = new SqlConnection(polku))
             {
                 conn.Open();
@@ -630,8 +667,6 @@ namespace Tilausjarjestelma
                 cmd.Parameters.AddWithValue("@id", id);
                 cmd.ExecuteNonQuery();
             }
-
-            MessageBox.Show("Varastosaldo päivitetty!");
 
             // Päivitä näkymä
             NykyinenSaldo_varastosaldo.Text = $"Saldo = {uusiSaldo}";

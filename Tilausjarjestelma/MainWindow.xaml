@@ -85,17 +85,6 @@
                     <DataGrid x:Name="PoistaTilaus_lista" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="400,30,30,30"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Lähetä tilaus">
-                <Grid Background="#FFE5E5E5">
-                    <Label Content="Tilauksen lisääminen" HorizontalAlignment="Left" Margin="30,30,0,0" VerticalAlignment="Top"/>
-                    <Label Content="Valitse tilaus:" HorizontalAlignment="Left" Margin="30,70,0,0" VerticalAlignment="Top"/>
-                    <ComboBox x:Name="TilausLähetä_tilaus" HorizontalAlignment="Left" Margin="150,70,0,0" VerticalAlignment="Top" Width="120"/>
-                    <Button x:Name="Laheta_tilaus" Content="Lähetä tilaus" HorizontalAlignment="Left" Margin="175,110,0,0" VerticalAlignment="Top"/>
-                    <Label Content="Valitse rivi ja lähetä se:" HorizontalAlignment="Left" Margin="25,150,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="Laheta_rivi" Content="Lähetä rivi" HorizontalAlignment="Left" Margin="175,150,0,0" VerticalAlignment="Top"/>
-                    <DataGrid x:Name="LahetaTilaus_lista" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="400,30,30,30"/>
-                </Grid>
-            </TabItem>
             <TabItem Header="Varastosaldo">
                 <Grid Background="#FFE5E5E5">
                     <Label Content="Muokkaa varastosaldoa" HorizontalAlignment="Left" Margin="30,30,0,0" VerticalAlignment="Top"/>
