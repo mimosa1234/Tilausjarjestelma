@@ -41,8 +41,6 @@ namespace Tilausjarjestelma
 
             PaivitaVarastoTuoteCombo();
             PaivitaVarastosaldoLista();
-
-            PaivitaLahetysTilausCombo();
         }
 
         // Yleiset metodit
@@ -162,11 +160,48 @@ namespace Tilausjarjestelma
 
             int id = (int)Asiakas_poisto.SelectedValue;
 
-            Poista("DELETE FROM Customers WHERE Id = @Id", id);
+            using (SqlConnection conn = new SqlConnection(polku))
+            {
+                conn.Open();
 
+                // Tarkista onko asiakkaalla tilauksia
+                using (SqlCommand checkCmd = new SqlCommand(
+                    "SELECT COUNT(*) FROM Orders WHERE CustomerId = @id", conn))
+                {
+                    checkCmd.Parameters.AddWithValue("@id", id);
+
+                    int tilauksia = (int)checkCmd.ExecuteScalar();
+
+                    if (tilauksia > 0)
+                    {
+                        MessageBox.Show(
+                            "Asiakasta ei voi poistaa, koska hänellä on olemassa olevia tilauksia.",
+                            "Poisto estetty",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning
+                        );
+                        return;
+                    }
+                }
+
+                // Jos ei tilauksia → poisto sallittu
+                using (SqlCommand deleteCmd = new SqlCommand(
+                    "DELETE FROM Customers WHERE Id = @Id", conn))
+                {
+                    deleteCmd.Parameters.AddWithValue("@Id", id);
+                    deleteCmd.ExecuteNonQuery();
+                }
+            }
+
+            // Päivitä näkymät
             PaivitaAsiakasLista();
             PaivitaAsiakasCombo();
+
+            LisaaTilaus_asiakas.SelectedIndex = -1;
+            LisaaTilaus_asiakas.IsEnabled = true;
+            PaivitaTilausAsiakasCombo();
         }
+
 
         // Kategoriat
         // Paivita kategoriat lista
@@ -217,11 +252,38 @@ namespace Tilausjarjestelma
 
             int id = (int)Kategoria_poisto.SelectedValue;
 
-            Poista("DELETE FROM Categories WHERE Id = @Id", id);
+            using (SqlConnection conn = new SqlConnection(polku))
+            {
+                conn.Open();
+
+                // Tarkista onko kategoriassa tuotteita
+                SqlCommand checkCmd = new SqlCommand(
+                    "SELECT COUNT(*) FROM Products WHERE CategoryId = @id", conn);
+                checkCmd.Parameters.AddWithValue("@id", id);
+
+                int tuotteita = (int)checkCmd.ExecuteScalar();
+
+                if (tuotteita > 0)
+                {
+                    MessageBox.Show(
+                        "Kategoriaa ei voi poistaa, koska siihen kuuluu tuotteita.\nPoista tai siirrä tuotteet ensin.");
+                    return;
+                }
+
+                // Jos ei tuotteita → poisto sallittu
+                SqlCommand deleteCmd = new SqlCommand(
+                    "DELETE FROM Categories WHERE Id = @id", conn);
+                deleteCmd.Parameters.AddWithValue("@id", id);
+                deleteCmd.ExecuteNonQuery();
+            }
+
+            Kategoria_poisto.SelectedIndex = -1;
 
             PaivitaKategoriatLista();
             PaivitaKategoriaCombo();
+            PaivitaTuoteKategoriaCombo();
         }
+
 
         // Tuotteet
         // Päivitä tuotelista
@@ -316,21 +378,49 @@ namespace Tilausjarjestelma
 
             int id = (int)Tuotteet_poista.SelectedValue;
 
-            string sql = "DELETE FROM Products WHERE Id = @Id";
-
-            try
+            using (SqlConnection conn = new SqlConnection(polku))
             {
-                Poista(sql, id);
+                conn.Open();
 
-                PaivitaTuoteLista();
-                PaivitaTuoteCombo();
-                PaivitaTuoteKategoriaCombo();
-                PaivitaVarastoTuoteCombo();
+                // 1) Tarkista onko tuotetta käytetty tilauksissa
+                using (SqlCommand checkCmd = new SqlCommand(
+                    "SELECT COUNT(*) FROM OrderItems WHERE ProductId = @id", conn))
+                {
+                    checkCmd.Parameters.AddWithValue("@id", id);
+                    int kpl = (int)checkCmd.ExecuteScalar();
+
+                    if (kpl > 0)
+                    {
+                        MessageBox.Show(
+                            "Tuotetta ei voi poistaa, koska sitä on käytetty tilauksissa.\n" +
+                            "Tuote tulee poistaa tilauksista ennen tuotteen poistamista.",
+                            "Poisto estetty",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning
+                        );
+                        return;
+                    }
+                }
+
+                // 2) Poista tuote jos sitä ei ole käytetty tilauksissa
+                using (SqlCommand deleteCmd = new SqlCommand(
+                    "DELETE FROM Products WHERE Id = @id", conn))
+                {
+                    deleteCmd.Parameters.AddWithValue("@id", id);
+                    deleteCmd.ExecuteNonQuery();
+                }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Virhe poistettaessa tuotetta: " + ex.Message);
-            }
+
+            // Päivitä näkymät ja nollaa valinnat
+            Tuotteet_poista.SelectedIndex = -1;
+            LisaaTuote_tuote.SelectedIndex = -1;
+
+            PaivitaTuoteLista();
+            PaivitaTuoteCombo();
+            PaivitaTilausTuoteCombo();
+            PaivitaTuoteKategoriaCombo();
+            PaivitaVarastoTuoteCombo();
+            PaivitaVarastosaldoLista();
         }
 
         // Tilaukset
@@ -384,37 +474,94 @@ namespace Tilausjarjestelma
 
             int tuoteId = (int)LisaaTuote_tuote.SelectedValue;
 
+            // Hae varastosaldo ja hinta
+            int saldo;
             decimal hinta;
+
             using (SqlConnection conn = new SqlConnection(polku))
             {
                 conn.Open();
+
                 using (SqlCommand cmd = new SqlCommand(
-                    "SELECT Price FROM Products WHERE Id = @id", conn))
+                    "SELECT Stock, Price FROM Products WHERE Id = @id", conn))
                 {
                     cmd.Parameters.AddWithValue("@id", tuoteId);
-                    hinta = (decimal)cmd.ExecuteScalar();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (!reader.Read())
+                        {
+                            MessageBox.Show("Tuotetta ei löytynyt.");
+                            return;
+                        }
+
+                        saldo = reader.GetInt32(0);
+                        hinta = reader.GetDecimal(1);
+                    }
                 }
             }
 
-            var row = (DataRowView)LisaaTuote_tuote.SelectedItem;
-            string tuoteNimi = row["Name"].ToString() ?? "";
+            // Tarkista onko tuote jo tilauksessa
+            var olemassaOleva = tilausRivit.FirstOrDefault(r => r.TuoteId == tuoteId);
 
-            tilausRivit.Add(new TilausRivi
+            if (olemassaOleva != null)
             {
-                TuoteId = tuoteId,
-                Tuote = tuoteNimi,
-                Maara = maara,
-                Yksikkohinta = hinta
-            });
+                int uusiMaara = olemassaOleva.Maara + maara;
 
+                if (uusiMaara > saldo)
+                {
+                    MessageBox.Show(
+                        $"Varastossa ei ole tarpeeksi tuotetta.\n" +
+                        $"Saatavilla: {saldo} kpl\n" +
+                        $"Tilauksessa jo: {olemassaOleva.Maara} kpl",
+                        "Varastosaldo ei riitä",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning
+                    );
+                    return;
+                }
+
+                // Päivitä olemassa olevan rivin määrä
+                olemassaOleva.Maara = uusiMaara;
+            }
+            else
+            {
+                if (maara > saldo)
+                {
+                    MessageBox.Show(
+                        $"Varastossa ei ole tarpeeksi tuotetta.\n" +
+                        $"Saatavilla: {saldo} kpl",
+                        "Varastosaldo ei riitä",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning
+                    );
+                    return;
+                }
+
+                var row = (DataRowView)LisaaTuote_tuote.SelectedItem;
+                string tuoteNimi = row["Name"].ToString() ?? "";
+
+                tilausRivit.Add(new TilausRivi
+                {
+                    TuoteId = tuoteId,
+                    Tuote = tuoteNimi,
+                    Maara = maara,
+                    Yksikkohinta = hinta
+                });
+            }
+
+            // Päivitä tilauslista
             LisaaTilaus_lista.ItemsSource = null;
             LisaaTilaus_lista.ItemsSource = tilausRivit;
 
+            // Lukitse asiakas ensimmäisen rivin jälkeen
             LisaaTilaus_asiakas.IsEnabled = false;
 
+            // Tyhjennä syötteet
             LisaaTuote_maara.Clear();
             LisaaTuote_tuote.SelectedIndex = -1;
         }
+
 
         // Luo tilaus
         private void Luo_tilaus_Click(object sender, RoutedEventArgs e)
@@ -433,44 +580,61 @@ namespace Tilausjarjestelma
 
             int asiakasId = (int)LisaaTilaus_asiakas.SelectedValue;
             decimal tilauksenSumma = tilausRivit.Sum(r => r.RivinSumma);
-            int uusiTilausId;
 
             using (SqlConnection conn = new SqlConnection(polku))
             {
                 conn.Open();
+                SqlTransaction tran = conn.BeginTransaction();
 
-                string orderSql = @"
-                    INSERT INTO Orders (CustomerId, OrderDate, TotalPrice)
-                    OUTPUT INSERTED.OrderId
-                    VALUES (@C, GETDATE(), @Total)";
-
-                using (SqlCommand cmd = new SqlCommand(orderSql, conn))
+                try
                 {
-                    cmd.Parameters.AddWithValue("@C", asiakasId);
-                    cmd.Parameters.AddWithValue("@Total", tilauksenSumma);
-                    uusiTilausId = (int)cmd.ExecuteScalar();
-                }
+                    int uusiTilausId;
 
-                foreach (var r in tilausRivit)
-                {
-                    string itemSql = @"
-                        INSERT INTO OrderItems (OrderId, ProductId, Quantity, UnitPrice, TotalPrice)
-                        VALUES (@O, @P, @Q, @U, @T)";
-
-                    using (SqlCommand cmd2 = new SqlCommand(itemSql, conn))
+                    using (SqlCommand cmd = new SqlCommand(@"
+                        INSERT INTO Orders (CustomerId, OrderDate, TotalPrice)
+                        OUTPUT INSERTED.OrderId
+                        VALUES (@C, GETDATE(), @Total)", conn, tran))
                     {
-                        cmd2.Parameters.AddWithValue("@O", uusiTilausId);
-                        cmd2.Parameters.AddWithValue("@P", r.TuoteId);
-                        cmd2.Parameters.AddWithValue("@Q", r.Maara);
-                        cmd2.Parameters.AddWithValue("@U", r.Yksikkohinta);
-                        cmd2.Parameters.AddWithValue("@T", r.RivinSumma);
-                        cmd2.ExecuteNonQuery();
+                        cmd.Parameters.AddWithValue("@C", asiakasId);
+                        cmd.Parameters.AddWithValue("@Total", tilauksenSumma);
+                        uusiTilausId = (int)cmd.ExecuteScalar();
                     }
+
+                    foreach (var r in tilausRivit)
+                    {
+                        using (SqlCommand cmd2 = new SqlCommand(@"
+                            INSERT INTO OrderItems (OrderId, ProductId, Quantity, UnitPrice, TotalPrice)
+                            VALUES (@O, @P, @Q, @U, @T)", conn, tran))
+                        {
+                            cmd2.Parameters.AddWithValue("@O", uusiTilausId);
+                            cmd2.Parameters.AddWithValue("@P", r.TuoteId);
+                            cmd2.Parameters.AddWithValue("@Q", r.Maara);
+                            cmd2.Parameters.AddWithValue("@U", r.Yksikkohinta);
+                            cmd2.Parameters.AddWithValue("@T", r.RivinSumma);
+                            cmd2.ExecuteNonQuery();
+                        }
+
+                        using (SqlCommand stockCmd = new SqlCommand(@"
+                            UPDATE Products SET Stock = Stock - @q WHERE Id = @p", conn, tran))
+                        {
+                            stockCmd.Parameters.AddWithValue("@q", r.Maara);
+                            stockCmd.Parameters.AddWithValue("@p", r.TuoteId);
+                            stockCmd.ExecuteNonQuery();
+                        }
+                    }
+
+                    tran.Commit();
+                }
+                catch (Exception ex)
+                {
+                    tran.Rollback();
+                    MessageBox.Show("Tilauksen luonti epäonnistui:\n" + ex.Message);
+                    return;
                 }
             }
 
-            MessageBox.Show("Tilaus luotu!");
-
+            PaivitaVarastosaldoLista();
+            PaivitaVarastoTuoteCombo();
             PaivitaTilaustenPoistoCombo();
 
             tilausRivit.Clear();
@@ -478,6 +642,7 @@ namespace Tilausjarjestelma
             LisaaTilaus_asiakas.IsEnabled = true;
             LisaaTilaus_asiakas.SelectedIndex = -1;
         }
+
 
         // Poista tilaus
         private void PaivitaTilaustenPoistoCombo()
@@ -527,6 +692,34 @@ namespace Tilausjarjestelma
             {
                 conn.Open();
 
+                SqlCommand haeRivit = new SqlCommand(
+                    "SELECT ProductId, Quantity FROM OrderItems WHERE OrderId = @id", conn);
+                haeRivit.Parameters.AddWithValue("@id", orderId);
+
+                List<(int tuoteId, int maara)> palautettavat = new();
+
+                using (SqlDataReader reader = haeRivit.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        palautettavat.Add((
+                            reader.GetInt32(0),
+                            reader.GetInt32(1)
+                        ));
+                    }
+                }
+               
+                foreach (var r in palautettavat)
+                {
+                    using (SqlCommand palautaSaldo = new SqlCommand(
+                        "UPDATE Products SET Stock = Stock + @q WHERE Id = @p", conn))
+                    {
+                        palautaSaldo.Parameters.AddWithValue("@q", r.maara);
+                        palautaSaldo.Parameters.AddWithValue("@p", r.tuoteId);
+                        palautaSaldo.ExecuteNonQuery();
+                    }
+                }
+
                 SqlCommand cmd1 = new SqlCommand(
                     "DELETE FROM OrderItems WHERE OrderId = @id", conn);
                 cmd1.Parameters.AddWithValue("@id", orderId);
@@ -538,11 +731,11 @@ namespace Tilausjarjestelma
                 cmd2.ExecuteNonQuery();
             }
 
-            MessageBox.Show("Tilaus poistettu!");
-
             PaivitaTilaustenPoistoCombo();
+            PaivitaVarastosaldoLista();
             PoistaTilaus_lista.ItemsSource = null;
         }
+
 
         // Poista tilauksen rivi
         private void Poista_rivi_Click(object sender, RoutedEventArgs e)
@@ -554,23 +747,48 @@ namespace Tilausjarjestelma
             }
 
             DataRowView row = (DataRowView)PoistaTilaus_lista.SelectedItem;
+
             int orderItemId = (int)row["OrderItemId"];
+            int maara = (int)row["Quantity"];
+
+            int tuoteId;
 
             using (SqlConnection conn = new SqlConnection(polku))
             {
                 conn.Open();
 
-                SqlCommand cmd = new SqlCommand(
-                    "DELETE FROM OrderItems WHERE OrderItemId = @id", conn);
-                cmd.Parameters.AddWithValue("@id", orderItemId);
-                cmd.ExecuteNonQuery();
+                // Hae ProductId ennen poistoa
+                using (SqlCommand haeTuote = new SqlCommand(
+                    "SELECT ProductId FROM OrderItems WHERE OrderItemId = @id", conn))
+                {
+                    haeTuote.Parameters.AddWithValue("@id", orderItemId);
+                    tuoteId = (int)haeTuote.ExecuteScalar();
+                }
+
+                // Palauta varastosaldo
+                using (SqlCommand palautaSaldo = new SqlCommand(
+                    "UPDATE Products SET Stock = Stock + @q WHERE Id = @p", conn))
+                {
+                    palautaSaldo.Parameters.AddWithValue("@q", maara);
+                    palautaSaldo.Parameters.AddWithValue("@p", tuoteId);
+                    palautaSaldo.ExecuteNonQuery();
+                }
+
+                // Poista tilausrivi
+                using (SqlCommand poistaRivi = new SqlCommand(
+                    "DELETE FROM OrderItems WHERE OrderItemId = @id", conn))
+                {
+                    poistaRivi.Parameters.AddWithValue("@id", orderItemId);
+                    poistaRivi.ExecuteNonQuery();
+                }
             }
 
-            MessageBox.Show("Rivi poistettu!");
-
+            // Päivitä näkymät
             int orderId = (int)TilausPoista_tilaus.SelectedValue;
             PaivitaTilausRivit(orderId);
+            PaivitaVarastosaldoLista();
         }
+
 
         // Varastosaldo
         // Päivitä varastotuotekombo
@@ -681,8 +899,6 @@ namespace Tilausjarjestelma
             NykyinenSaldo_varastosaldo.Text = "Saldo = -";
 
             Muokkaa_varastosaldo.SelectedIndex = -1;
-
-
         }
 
 
