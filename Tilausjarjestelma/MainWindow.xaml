@@ -13,19 +13,14 @@
         Width="1280"
         MinWidth="1200"
         MinHeight="700"
-        Background="White">
-    <Grid Background="White">
-        <Border Margin="12,12,12,0"
-                Height="42"
-                Background="#FFE6EBF2"
-                BorderBrush="#FFB8C1D0"
-                BorderThickness="1" />
+        Background="#FFF3F5F7">
+    <Grid Background="#FFF3F5F7">
         <Controls:MetroTabControl TabStripPlacement="Top"
                                   Margin="12"
                                   FontSize="14"
                                   Background="Transparent"
-                                  BorderThickness="0"
-                                  Controls:TabControlHelper.Underlined="False">
+                                  Controls:TabControlHelper.Underlined="True"
+                                  Controls:TabControlHelper.UnderlineSelectedBrush="#FF2F74D0">
             <TabItem Header="Asiakkaat">
                 <Grid Background="White" Margin="0,8,0,0">
                     <Label Content="Asiakkaan lisääminen:" HorizontalAlignment="Left" Margin="30,30,0,0" VerticalAlignment="Top"/>
