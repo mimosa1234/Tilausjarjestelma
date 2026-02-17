@@ -12,7 +12,7 @@
         Height="450"
         Width="800">
     <Grid>
-        <TabControl>
+        <Controls:MetroAnimatedSingleRowTabControl TabStripPlacement="Top">
             <TabItem Header="Asiakkaat">
                 <Grid Background="#FFE5E5E5">
                     <Label Content="Asiakkaan lisääminen:" HorizontalAlignment="Left" Margin="30,30,0,0" VerticalAlignment="Top"/>
@@ -107,9 +107,10 @@
                     <DataGrid x:Name="Varastosaldo_lista" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="400,30,30,30"/>
                 </Grid>
             </TabItem>
-        </TabControl>
+        </Controls:MetroAnimatedSingleRowTabControl>
 
     </Grid>
 </Controls:MetroWindow>
+
 
 
