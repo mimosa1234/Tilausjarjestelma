@@ -1,4 +1,4 @@
-﻿<Controls:MetroWindow x:Class="Tilausjarjestelma.MainWindow"
+<Controls:MetroWindow x:Class="Tilausjarjestelma.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -15,10 +15,19 @@
         MinHeight="700"
         Background="#FFF3F5F7">
     <Grid Background="#FFF3F5F7">
+        <Border Margin="12,12,12,0"
+                Height="44"
+                VerticalAlignment="Top"
+                Background="#FFE3E9F2" />
+        <Border Margin="12,56,12,0"
+                Height="1"
+                VerticalAlignment="Top"
+                Background="#FFB8C4D6" />
         <Controls:MetroTabControl TabStripPlacement="Top"
                                   Margin="12"
                                   FontSize="14"
                                   Background="Transparent"
+                                  BorderThickness="0"
                                   Controls:TabControlHelper.Underlined="True"
                                   Controls:TabControlHelper.UnderlineSelectedBrush="#FF2F74D0">
             <TabItem Header="Asiakkaat">
