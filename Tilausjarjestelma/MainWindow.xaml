@@ -15,7 +15,7 @@
         MinHeight="700"
         Background="White">
     <Grid Background="White">
-        <Controls:MetroTabControl TabStripPlacement="Top" Margin="12" FontSize="16" Background="#FFF5F7FA" BorderBrush="#FFD8DEE9" BorderThickness="1" Controls:TabControlHelper.Underlined="True" Controls:TabControlHelper.UnderlineBrush="#FFB7C3D7" Controls:TabControlHelper.UnderlineSelectedBrush="#FF2F74D0">
+        <Controls:MetroTabControl TabStripPlacement="Top" Margin="12" FontSize="14" Background="#FFE6EBF2" BorderBrush="#FFB8C1D0" BorderThickness="1" Controls:TabControlHelper.Underlined="False">
             <TabItem Header="Asiakkaat">
                 <Grid Background="White" Margin="0,8,0,0">
                     <Label Content="Asiakkaan lisääminen:" HorizontalAlignment="Left" Margin="30,30,0,0" VerticalAlignment="Top"/>
@@ -114,6 +114,7 @@
 
     </Grid>
 </Controls:MetroWindow>
+
 
 
 
