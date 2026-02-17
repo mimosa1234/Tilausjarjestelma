@@ -15,9 +15,9 @@
         MinHeight="700"
         Background="White">
     <Grid Background="White">
-        <Controls:MetroTabControl TabStripPlacement="Top" Margin="12" FontSize="16">
+        <Controls:MetroTabControl TabStripPlacement="Top" Margin="12" FontSize="16" Background="#FFF5F7FA" BorderBrush="#FFD8DEE9" BorderThickness="1" Controls:TabControlHelper.Underlined="True" Controls:TabControlHelper.UnderlineBrush="#FFB7C3D7" Controls:TabControlHelper.UnderlineSelectedBrush="#FF2F74D0">
             <TabItem Header="Asiakkaat">
-                <Grid Background="White">
+                <Grid Background="White" Margin="0,8,0,0">
                     <Label Content="Asiakkaan lisääminen:" HorizontalAlignment="Left" Margin="30,30,0,0" VerticalAlignment="Top"/>
                     <Label Content="Etunimi" HorizontalAlignment="Left" Margin="30,70,0,0" VerticalAlignment="Top"/>
                     <TextBox x:Name="Asiakas_etunimi" HorizontalAlignment="Left" Margin="150,70,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="120"/>
@@ -37,7 +37,7 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Kategoriat">
-                <Grid Background="White">
+                <Grid Background="White" Margin="0,8,0,0">
                     <Label Content="Kategorian lisääminen:" HorizontalAlignment="Left" Margin="30,30,0,0" VerticalAlignment="Top"/>
                     <TextBox x:Name="Kategoria_nimi" HorizontalAlignment="Left" Margin="150,70,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="120"/>
                     <Label Content="Nimi" HorizontalAlignment="Left" Margin="30,70,0,0" VerticalAlignment="Top"/>
@@ -49,7 +49,7 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Tuotteet">
-                <Grid Background="White">
+                <Grid Background="White" Margin="0,8,0,0">
                     <Label Content="Tuotteen lisääminen:" HorizontalAlignment="Left" Margin="30,30,0,0" VerticalAlignment="Top"/>
                     <Label Content="Nimi" HorizontalAlignment="Left" Margin="30,70,0,0" VerticalAlignment="Top"/>
                     <TextBox x:Name="Tuotteet_nimi" HorizontalAlignment="Left" Margin="150,70,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="120"/>
@@ -69,7 +69,7 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Lisää tilaus">
-                <Grid Background="White">
+                <Grid Background="White" Margin="0,8,0,0">
                     <Label Content="Tilauksen lisääminen:" HorizontalAlignment="Left" Margin="30,30,0,0" VerticalAlignment="Top"/>
                     <Label Content="Asiakas" HorizontalAlignment="Left" Margin="30,70,0,0" VerticalAlignment="Top"/>
                     <ComboBox x:Name="LisaaTilaus_asiakas" HorizontalAlignment="Left" Margin="150,70,0,0" VerticalAlignment="Top" Width="120"/>
@@ -83,7 +83,7 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Poista tilaus">
-                <Grid Background="White">
+                <Grid Background="White" Margin="0,8,0,0">
                     <Label Content="Tilauksen poistaminen" HorizontalAlignment="Left" Margin="30,30,0,0" VerticalAlignment="Top"/>
                     <Label Content="Valitse tilaus:" HorizontalAlignment="Left" Margin="30,70,0,0" VerticalAlignment="Top"/>
                     <ComboBox x:Name="TilausPoista_tilaus" HorizontalAlignment="Left" Margin="150,70,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="TilausPoista_tilaus_SelectionChanged"/>
@@ -94,7 +94,7 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Varastosaldo">
-                <Grid Background="White">
+                <Grid Background="White" Margin="0,8,0,0">
                     <Label Content="Muokkaa varastosaldoa" HorizontalAlignment="Left" Margin="30,30,0,0" VerticalAlignment="Top"/>
                     <Label Content="Valitse tuote:" HorizontalAlignment="Left" Margin="30,70,0,0" VerticalAlignment="Top"/>
                     <ComboBox x:Name="Muokkaa_varastosaldo" HorizontalAlignment="Left" Margin="150,70,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="Muokkaa_varastosaldo_SelectionChanged"/>
@@ -114,6 +114,8 @@
 
     </Grid>
 </Controls:MetroWindow>
+
+
 
 
 
