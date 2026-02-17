@@ -46,7 +46,7 @@ Tama projekti on WPF (.NET 8), joten kayta Windows Application Packaging Project
 3. Kaynnista sovellus ja testaa CRUD + tilaus + varastosaldo.
 
 ## Huomio tietokannasta
-Sovellus kayttaa LocalDB-yhteytta. Varmista kohdekoneella:
+Sovellus kayttaa LocalDB-yhteytta tietokannan nimella (`Initial Catalog=Tilausjarjestelma`), ei kovakoodatulla tiedostopolulla. Varmista kohdekoneella:
 1. SQL Server LocalDB on asennettu.
 2. Tietokanta alustetaan SQL-skripteilla:
    - `create_database.sql`

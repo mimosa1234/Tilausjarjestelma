@@ -19,7 +19,8 @@ namespace Tilausjarjestelma
 
     public partial class MainWindow : MetroWindow
     {
-        string polku = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\hp\Documents\Tilausjarjestelma\Tilausjarjestelma\Tilausjarjestelma.mdf;Integrated Security=True;Connect Timeout=30";
+        private readonly string polku =
+            @"Data Source=(LocalDB)\MSSQLLocalDB;Initial Catalog=Tilausjarjestelma;Integrated Security=True;Connect Timeout=30";
 
         public MainWindow()
         {
