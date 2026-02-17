@@ -6,74 +6,76 @@ USE Tilausjarjestelma;
 -- TABLE: Customers
 -- ============================
 CREATE TABLE Customers (
-    CustomerId INT PRIMARY KEY IDENTITY(1,1),
-    FirstName NVARCHAR(50) NOT NULL,
-    LastName NVARCHAR(50) NOT NULL,
-    Email NVARCHAR(100),
-    Phone NVARCHAR(20),
-    Address NVARCHAR(200)
+    id INT PRIMARY KEY IDENTITY(1,1),
+    first_name NVARCHAR(50) NOT NULL,
+    last_name NVARCHAR(50) NOT NULL,
+    email NVARCHAR(100),
+    phone NVARCHAR(20),
+    address NVARCHAR(200)
 );
 
 -- ============================
 -- TABLE: Categories
 -- ============================
 CREATE TABLE Categories (
-    CategoryId INT PRIMARY KEY IDENTITY(1,1),
-    Name NVARCHAR(100) NOT NULL
+    id INT PRIMARY KEY IDENTITY(1,1),
+    name NVARCHAR(100) NOT NULL
 );
 
 -- ============================
 -- TABLE: Products
 -- ============================
 CREATE TABLE Products (
-    ProductId INT PRIMARY KEY IDENTITY(1,1),
-    Name NVARCHAR(100) NOT NULL,
-    Price DECIMAL(10,2) NOT NULL,
-    Description NVARCHAR(300),
-    CategoryId INT NOT NULL,
-    Stock INT NOT NULL DEFAULT 0,
-    IsActive BIT NOT NULL DEFAULT 1,
+    id INT PRIMARY KEY IDENTITY(1,1),
+    name NVARCHAR(100) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    description NVARCHAR(300),
+    category_id INT NOT NULL,
+    stock INT NOT NULL DEFAULT 0,
+    is_active BIT NOT NULL DEFAULT 1,
 
     CONSTRAINT FK_Product_Category
-        FOREIGN KEY (CategoryId)
-        REFERENCES Categories(CategoryId)
+        FOREIGN KEY (category_id)
+        REFERENCES Categories(id)
 );
 
 -- ============================
 -- TABLE: Orders
 -- ============================
 CREATE TABLE Orders (
-    OrderId INT PRIMARY KEY IDENTITY(1,1),
-    CustomerId INT NOT NULL,
-    OrderDate DATETIME NOT NULL DEFAULT GETDATE(),
+    id INT PRIMARY KEY IDENTITY(1,1),
+    customer_id INT NOT NULL,
+    order_date DATETIME NOT NULL DEFAULT GETDATE(),
+    total_price DECIMAL(10,2) NOT NULL DEFAULT 0,
 
-    -- Lis‰tty kent‰t, joita WPF-koodi k‰ytt‰‰
-    CustomerName NVARCHAR(120),
-    CustomerEmail NVARCHAR(120),
-    CustomerPhone NVARCHAR(50),
-    CustomerAddress NVARCHAR(200),
+    -- Lisatyt kentat, joita WPF-koodi kayttaa
+    customer_name NVARCHAR(120),
+    customer_email NVARCHAR(120),
+    customer_phone NVARCHAR(50),
+    customer_address NVARCHAR(200),
 
     CONSTRAINT FK_Orders_Customers
-        FOREIGN KEY (CustomerId)
-        REFERENCES Customers(CustomerId)
+        FOREIGN KEY (customer_id)
+        REFERENCES Customers(id)
 );
 
 -- ============================
 -- TABLE: OrderItems
 -- ============================
 CREATE TABLE OrderItems (
-    OrderItemId INT PRIMARY KEY IDENTITY(1,1),
-    OrderId INT NOT NULL,
-    ProductId INT NOT NULL,
-    Quantity INT NOT NULL,
-    UnitPrice DECIMAL(10,2) NOT NULL,
+    id INT PRIMARY KEY IDENTITY(1,1),
+    order_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,
+    total_price DECIMAL(10,2) NOT NULL,
 
     CONSTRAINT FK_OrderItems_Orders
-        FOREIGN KEY (OrderId)
-        REFERENCES Orders(OrderId)
+        FOREIGN KEY (order_id)
+        REFERENCES Orders(id)
         ON DELETE CASCADE,
 
     CONSTRAINT FK_OrderItems_Products
-        FOREIGN KEY (ProductId)
-        REFERENCES Products(ProductId)
+        FOREIGN KEY (product_id)
+        REFERENCES Products(id)
 );

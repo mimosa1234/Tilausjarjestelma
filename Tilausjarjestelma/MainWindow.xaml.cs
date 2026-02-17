@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -114,7 +114,7 @@ namespace Tilausjarjestelma
         private void LisaaAsiakas_Click(object sender, RoutedEventArgs e)
         {
             string sql = @"
-                INSERT INTO Customers (FirstName, LastName, Email, Phone, Address)
+                INSERT INTO Customers (first_name, last_name, email, phone, address)
                 VALUES (@F, @L, @E, @P, @A)";
 
             Lisaa(sql, new Dictionary<string, object>()
@@ -143,9 +143,9 @@ namespace Tilausjarjestelma
         {
             PaivitaComboBox(
                 Asiakas_poisto,
-                "SELECT Id, FirstName + ' ' + LastName AS Nimi FROM Customers",
+                "SELECT id, first_name + ' ' + last_name AS Nimi FROM Customers",
                 "Nimi",
-                "Id"
+                "id"
             );
         }
 
@@ -166,7 +166,7 @@ namespace Tilausjarjestelma
 
                 // Tarkista onko asiakkaalla tilauksia
                 using (SqlCommand checkCmd = new SqlCommand(
-                    "SELECT COUNT(*) FROM Orders WHERE CustomerId = @id", conn))
+                    "SELECT COUNT(*) FROM Orders WHERE customer_id = @id", conn))
                 {
                     checkCmd.Parameters.AddWithValue("@id", id);
 
@@ -186,7 +186,7 @@ namespace Tilausjarjestelma
 
                 // Jos ei tilauksia → poisto sallittu
                 using (SqlCommand deleteCmd = new SqlCommand(
-                    "DELETE FROM Customers WHERE Id = @Id", conn))
+                    "DELETE FROM Customers WHERE id = @Id", conn))
                 {
                     deleteCmd.Parameters.AddWithValue("@Id", id);
                     deleteCmd.ExecuteNonQuery();
@@ -213,7 +213,7 @@ namespace Tilausjarjestelma
         // Lisaa kategoria
         private void Lisaa_kategoria_Click(object sender, RoutedEventArgs e)
         {
-            string sql = "INSERT INTO Categories (Name) VALUES (@Name)";
+            string sql = "INSERT INTO Categories (name) VALUES (@Name)";
 
             var param = new Dictionary<string, object>()
             {
@@ -235,9 +235,9 @@ namespace Tilausjarjestelma
         {
             PaivitaComboBox(
                 Kategoria_poisto,
-                "SELECT Id, Name FROM Categories",
-                "Name",
-                "Id"
+                "SELECT id, name FROM Categories",
+                "name",
+                "id"
             );
         }
 
@@ -258,7 +258,7 @@ namespace Tilausjarjestelma
 
                 // Tarkista onko kategoriassa tuotteita
                 SqlCommand checkCmd = new SqlCommand(
-                    "SELECT COUNT(*) FROM Products WHERE CategoryId = @id", conn);
+                    "SELECT COUNT(*) FROM Products WHERE category_id = @id", conn);
                 checkCmd.Parameters.AddWithValue("@id", id);
 
                 int tuotteita = (int)checkCmd.ExecuteScalar();
@@ -272,7 +272,7 @@ namespace Tilausjarjestelma
 
                 // Jos ei tuotteita → poisto sallittu
                 SqlCommand deleteCmd = new SqlCommand(
-                    "DELETE FROM Categories WHERE Id = @id", conn);
+                    "DELETE FROM Categories WHERE id = @id", conn);
                 deleteCmd.Parameters.AddWithValue("@id", id);
                 deleteCmd.ExecuteNonQuery();
             }
@@ -317,7 +317,7 @@ namespace Tilausjarjestelma
                 return;
             }
 
-            string sql = @"INSERT INTO Products (Name, Price, Description, CategoryId, Stock)
+            string sql = @"INSERT INTO Products (name, price, description, category_id, stock)
                    VALUES (@N, @P, @D, @C, @S)";
 
             Lisaa(sql, new Dictionary<string, object>()
@@ -350,9 +350,9 @@ namespace Tilausjarjestelma
         {
             PaivitaComboBox(
                 Tuotteet_poista,
-                "SELECT Id, Name FROM Products",
-                "Name",
-                "Id"
+                "SELECT id, name FROM Products",
+                "name",
+                "id"
             );
         }
 
@@ -361,9 +361,9 @@ namespace Tilausjarjestelma
         {
             PaivitaComboBox(
                 Tuotteet_kategoria,
-                "SELECT Id, Name FROM Categories",
-                "Name",
-                "Id"
+                "SELECT id, name FROM Categories",
+                "name",
+                "id"
             );
         }
 
@@ -384,7 +384,7 @@ namespace Tilausjarjestelma
 
                 // 1) Tarkista onko tuotetta käytetty tilauksissa
                 using (SqlCommand checkCmd = new SqlCommand(
-                    "SELECT COUNT(*) FROM OrderItems WHERE ProductId = @id", conn))
+                    "SELECT COUNT(*) FROM OrderItems WHERE product_id = @id", conn))
                 {
                     checkCmd.Parameters.AddWithValue("@id", id);
                     int kpl = (int)checkCmd.ExecuteScalar();
@@ -404,7 +404,7 @@ namespace Tilausjarjestelma
 
                 // 2) Poista tuote jos sitä ei ole käytetty tilauksissa
                 using (SqlCommand deleteCmd = new SqlCommand(
-                    "DELETE FROM Products WHERE Id = @id", conn))
+                    "DELETE FROM Products WHERE id = @id", conn))
                 {
                     deleteCmd.Parameters.AddWithValue("@id", id);
                     deleteCmd.ExecuteNonQuery();
@@ -429,9 +429,9 @@ namespace Tilausjarjestelma
         {
             PaivitaComboBox(
                 LisaaTilaus_asiakas,
-                "SELECT Id, FirstName + ' ' + LastName AS Nimi FROM Customers",
+                "SELECT id, first_name + ' ' + last_name AS Nimi FROM Customers",
                 "Nimi",
-                "Id"
+                "id"
             );
         }
 
@@ -440,9 +440,9 @@ namespace Tilausjarjestelma
         {
             PaivitaComboBox(
                 LisaaTuote_tuote,
-                "SELECT Id, Name FROM Products",
-                "Name",
-                "Id"
+                "SELECT id, name FROM Products",
+                "name",
+                "id"
             );
         }
         private class TilausRivi
@@ -483,7 +483,7 @@ namespace Tilausjarjestelma
                 conn.Open();
 
                 using (SqlCommand cmd = new SqlCommand(
-                    "SELECT Stock, Price FROM Products WHERE Id = @id", conn))
+                    "SELECT stock, price FROM Products WHERE id = @id", conn))
                 {
                     cmd.Parameters.AddWithValue("@id", tuoteId);
 
@@ -539,7 +539,7 @@ namespace Tilausjarjestelma
                 }
 
                 var row = (DataRowView)LisaaTuote_tuote.SelectedItem;
-                string tuoteNimi = row["Name"].ToString() ?? "";
+                string tuoteNimi = row["name"].ToString() ?? "";
 
                 tilausRivit.Add(new TilausRivi
                 {
@@ -591,8 +591,8 @@ namespace Tilausjarjestelma
                     int uusiTilausId;
 
                     using (SqlCommand cmd = new SqlCommand(@"
-                        INSERT INTO Orders (CustomerId, OrderDate, TotalPrice)
-                        OUTPUT INSERTED.OrderId
+                        INSERT INTO Orders (customer_id, order_date, total_price)
+                        OUTPUT INSERTED.id
                         VALUES (@C, GETDATE(), @Total)", conn, tran))
                     {
                         cmd.Parameters.AddWithValue("@C", asiakasId);
@@ -603,7 +603,7 @@ namespace Tilausjarjestelma
                     foreach (var r in tilausRivit)
                     {
                         using (SqlCommand cmd2 = new SqlCommand(@"
-                            INSERT INTO OrderItems (OrderId, ProductId, Quantity, UnitPrice, TotalPrice)
+                            INSERT INTO OrderItems (order_id, product_id, quantity, unit_price, total_price)
                             VALUES (@O, @P, @Q, @U, @T)", conn, tran))
                         {
                             cmd2.Parameters.AddWithValue("@O", uusiTilausId);
@@ -615,7 +615,7 @@ namespace Tilausjarjestelma
                         }
 
                         using (SqlCommand stockCmd = new SqlCommand(@"
-                            UPDATE Products SET Stock = Stock - @q WHERE Id = @p", conn, tran))
+                            UPDATE Products SET stock = stock - @q WHERE id = @p", conn, tran))
                         {
                             stockCmd.Parameters.AddWithValue("@q", r.Maara);
                             stockCmd.Parameters.AddWithValue("@p", r.TuoteId);
@@ -649,9 +649,9 @@ namespace Tilausjarjestelma
         {
             PaivitaComboBox(
                 TilausPoista_tilaus,
-                "SELECT OrderId FROM Orders",
-                "OrderId",
-                "OrderId"
+                "SELECT id FROM Orders",
+                "id",
+                "id"
             );
         }
 
@@ -659,10 +659,10 @@ namespace Tilausjarjestelma
         private void PaivitaTilausRivit(int orderId)
         {
             string sql = $@"
-                SELECT OI.OrderItemId, P.Name AS Tuote, OI.Quantity, OI.UnitPrice, OI.TotalPrice
+                SELECT OI.id, P.name AS Tuote, OI.quantity, OI.unit_price, OI.total_price
                 FROM OrderItems OI
-                INNER JOIN Products P ON OI.ProductId = P.Id
-                WHERE OI.OrderId = {orderId}";
+                INNER JOIN Products P ON OI.product_id = P.id
+                WHERE OI.order_id = {orderId}";
 
             PaivitaDataGrid(PoistaTilaus_lista, sql);
         }
@@ -693,7 +693,7 @@ namespace Tilausjarjestelma
                 conn.Open();
 
                 SqlCommand haeRivit = new SqlCommand(
-                    "SELECT ProductId, Quantity FROM OrderItems WHERE OrderId = @id", conn);
+                    "SELECT product_id, quantity FROM OrderItems WHERE order_id = @id", conn);
                 haeRivit.Parameters.AddWithValue("@id", orderId);
 
                 List<(int tuoteId, int maara)> palautettavat = new();
@@ -712,7 +712,7 @@ namespace Tilausjarjestelma
                 foreach (var r in palautettavat)
                 {
                     using (SqlCommand palautaSaldo = new SqlCommand(
-                        "UPDATE Products SET Stock = Stock + @q WHERE Id = @p", conn))
+                        "UPDATE Products SET stock = stock + @q WHERE id = @p", conn))
                     {
                         palautaSaldo.Parameters.AddWithValue("@q", r.maara);
                         palautaSaldo.Parameters.AddWithValue("@p", r.tuoteId);
@@ -721,12 +721,12 @@ namespace Tilausjarjestelma
                 }
 
                 SqlCommand cmd1 = new SqlCommand(
-                    "DELETE FROM OrderItems WHERE OrderId = @id", conn);
+                    "DELETE FROM OrderItems WHERE order_id = @id", conn);
                 cmd1.Parameters.AddWithValue("@id", orderId);
                 cmd1.ExecuteNonQuery();
 
                 SqlCommand cmd2 = new SqlCommand(
-                    "DELETE FROM Orders WHERE OrderId = @id", conn);
+                    "DELETE FROM Orders WHERE id = @id", conn);
                 cmd2.Parameters.AddWithValue("@id", orderId);
                 cmd2.ExecuteNonQuery();
             }
@@ -748,8 +748,8 @@ namespace Tilausjarjestelma
 
             DataRowView row = (DataRowView)PoistaTilaus_lista.SelectedItem;
 
-            int orderItemId = (int)row["OrderItemId"];
-            int maara = (int)row["Quantity"];
+            int orderItemId = (int)row["id"];
+            int maara = (int)row["quantity"];
 
             int tuoteId;
 
@@ -759,7 +759,7 @@ namespace Tilausjarjestelma
 
                 // Hae ProductId ennen poistoa
                 using (SqlCommand haeTuote = new SqlCommand(
-                    "SELECT ProductId FROM OrderItems WHERE OrderItemId = @id", conn))
+                    "SELECT product_id FROM OrderItems WHERE id = @id", conn))
                 {
                     haeTuote.Parameters.AddWithValue("@id", orderItemId);
                     tuoteId = (int)haeTuote.ExecuteScalar();
@@ -767,7 +767,7 @@ namespace Tilausjarjestelma
 
                 // Palauta varastosaldo
                 using (SqlCommand palautaSaldo = new SqlCommand(
-                    "UPDATE Products SET Stock = Stock + @q WHERE Id = @p", conn))
+                    "UPDATE Products SET stock = stock + @q WHERE id = @p", conn))
                 {
                     palautaSaldo.Parameters.AddWithValue("@q", maara);
                     palautaSaldo.Parameters.AddWithValue("@p", tuoteId);
@@ -776,7 +776,7 @@ namespace Tilausjarjestelma
 
                 // Poista tilausrivi
                 using (SqlCommand poistaRivi = new SqlCommand(
-                    "DELETE FROM OrderItems WHERE OrderItemId = @id", conn))
+                    "DELETE FROM OrderItems WHERE id = @id", conn))
                 {
                     poistaRivi.Parameters.AddWithValue("@id", orderItemId);
                     poistaRivi.ExecuteNonQuery();
@@ -796,9 +796,9 @@ namespace Tilausjarjestelma
         {
             PaivitaComboBox(
                 Muokkaa_varastosaldo,
-                "SELECT Id, Name FROM Products",
-                "Name",
-                "Id"
+                "SELECT id, name FROM Products",
+                "name",
+                "id"
             );
         }
 
@@ -806,7 +806,7 @@ namespace Tilausjarjestelma
         private void PaivitaVarastosaldoLista()
         {
             PaivitaDataGrid(Varastosaldo_lista,
-                "SELECT Id, Name, Stock FROM Products");
+                "SELECT id, name, stock FROM Products");
         }
 
         // Varastosaldon muokkaustapahtumat
@@ -821,7 +821,7 @@ namespace Tilausjarjestelma
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand(
-                    "SELECT Stock FROM Products WHERE Id = @id", conn);
+                    "SELECT stock FROM Products WHERE id = @id", conn);
                 cmd.Parameters.AddWithValue("@id", id);
 
                 int saldo = (int)cmd.ExecuteScalar();
@@ -853,7 +853,7 @@ namespace Tilausjarjestelma
 
                 // Hae nykyinen saldo
                 SqlCommand cmd1 = new SqlCommand(
-                    "SELECT Stock FROM Products WHERE Id = @id", conn);
+                    "SELECT stock FROM Products WHERE id = @id", conn);
                 cmd1.Parameters.AddWithValue("@id", id);
                 nykyinenSaldo = (int)cmd1.ExecuteScalar();
             }
@@ -880,7 +880,7 @@ namespace Tilausjarjestelma
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand(
-                    "UPDATE Products SET Stock = @s WHERE Id = @id", conn);
+                    "UPDATE Products SET stock = @s WHERE id = @id", conn);
                 cmd.Parameters.AddWithValue("@s", uusiSaldo);
                 cmd.Parameters.AddWithValue("@id", id);
                 cmd.ExecuteNonQuery();
@@ -904,3 +904,4 @@ namespace Tilausjarjestelma
 
     }
 }
+
