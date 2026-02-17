@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -11,12 +11,13 @@ using System.Windows.Shapes;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Collections.Generic;
+using MahApps.Metro.Controls;
 
 
 namespace Tilausjarjestelma
 {
 
-    public partial class MainWindow : Window
+    public partial class MainWindow : MetroWindow
     {
         string polku = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\hp\Documents\Tilausjarjestelma\Tilausjarjestelma\Tilausjarjestelma.mdf;Integrated Security=True;Connect Timeout=30";
 
@@ -45,7 +46,7 @@ namespace Tilausjarjestelma
 
         // Yleiset metodit
 
-        // Yleinen metodi datagridin päivittämiseen
+        // Yleinen metodi datagridin pÃ¤ivittÃ¤miseen
         private void PaivitaDataGrid(DataGrid grid, string sql)
         {
             using (SqlConnection conn = new SqlConnection(polku))
@@ -58,7 +59,7 @@ namespace Tilausjarjestelma
             }
         }
 
-        // Yleinen metodi comboboxin päivittämiseen
+        // Yleinen metodi comboboxin pÃ¤ivittÃ¤miseen
         private void PaivitaComboBox(ComboBox box, string sql, string display, string value)
         {
             using (SqlConnection conn = new SqlConnection(polku))
@@ -73,7 +74,7 @@ namespace Tilausjarjestelma
                 box.SelectedValuePath = value;
             }
         }
-        // Yleinen metodi tietueen lisäämiseen
+        // Yleinen metodi tietueen lisÃ¤Ã¤miseen
         private void Lisaa(string sql, Dictionary<string, object> param)
         {
             using (SqlConnection conn = new SqlConnection(polku))
@@ -104,13 +105,13 @@ namespace Tilausjarjestelma
         }
 
         // Asiakkaat
-        // Päivitä asiakaslista
+        // PÃ¤ivitÃ¤ asiakaslista
         private void PaivitaAsiakasLista()
         {
             PaivitaDataGrid(Asiakkaat_lista, "SELECT * FROM Customers");
         }
 
-        // Lisää asiakas
+        // LisÃ¤Ã¤ asiakas
         private void LisaaAsiakas_Click(object sender, RoutedEventArgs e)
         {
             string sql = @"
@@ -138,7 +139,7 @@ namespace Tilausjarjestelma
             Asiakas_osoite.Clear();
         }
 
-        // Päivitä asiakaskombo
+        // PÃ¤ivitÃ¤ asiakaskombo
         private void PaivitaAsiakasCombo()
         {
             PaivitaComboBox(
@@ -175,7 +176,7 @@ namespace Tilausjarjestelma
                     if (tilauksia > 0)
                     {
                         MessageBox.Show(
-                            "Asiakasta ei voi poistaa, koska hänellä on olemassa olevia tilauksia.",
+                            "Asiakasta ei voi poistaa, koska hÃ¤nellÃ¤ on olemassa olevia tilauksia.",
                             "Poisto estetty",
                             MessageBoxButton.OK,
                             MessageBoxImage.Warning
@@ -184,7 +185,7 @@ namespace Tilausjarjestelma
                     }
                 }
 
-                // Jos ei tilauksia → poisto sallittu
+                // Jos ei tilauksia â†’ poisto sallittu
                 using (SqlCommand deleteCmd = new SqlCommand(
                     "DELETE FROM Customers WHERE id = @Id", conn))
                 {
@@ -193,7 +194,7 @@ namespace Tilausjarjestelma
                 }
             }
 
-            // Päivitä näkymät
+            // PÃ¤ivitÃ¤ nÃ¤kymÃ¤t
             PaivitaAsiakasLista();
             PaivitaAsiakasCombo();
 
@@ -230,7 +231,7 @@ namespace Tilausjarjestelma
             Kategoria_nimi.Text = "";
         }
 
-        // Päivitä kategoria combo
+        // PÃ¤ivitÃ¤ kategoria combo
         private void PaivitaKategoriaCombo()
         {
             PaivitaComboBox(
@@ -266,11 +267,11 @@ namespace Tilausjarjestelma
                 if (tuotteita > 0)
                 {
                     MessageBox.Show(
-                        "Kategoriaa ei voi poistaa, koska siihen kuuluu tuotteita.\nPoista tai siirrä tuotteet ensin.");
+                        "Kategoriaa ei voi poistaa, koska siihen kuuluu tuotteita.\nPoista tai siirrÃ¤ tuotteet ensin.");
                     return;
                 }
 
-                // Jos ei tuotteita → poisto sallittu
+                // Jos ei tuotteita â†’ poisto sallittu
                 SqlCommand deleteCmd = new SqlCommand(
                     "DELETE FROM Categories WHERE id = @id", conn);
                 deleteCmd.Parameters.AddWithValue("@id", id);
@@ -286,13 +287,13 @@ namespace Tilausjarjestelma
 
 
         // Tuotteet
-        // Päivitä tuotelista
+        // PÃ¤ivitÃ¤ tuotelista
         private void PaivitaTuoteLista()
         {
             PaivitaDataGrid(Tuotteet_lista, "SELECT * FROM Products");
         }
 
-        // Lisää tuote
+        // LisÃ¤Ã¤ tuote
         private void Lisaa_tuote_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(Tuotteet_nimi.Text) ||
@@ -301,7 +302,7 @@ namespace Tilausjarjestelma
                 Tuotteet_kategoria.SelectedValue == null ||
                 string.IsNullOrWhiteSpace(Tuotteet_varastosaldo.Text))
             {
-                MessageBox.Show("Täytä kaikki kentät!");
+                MessageBox.Show("TÃ¤ytÃ¤ kaikki kentÃ¤t!");
                 return;
             }
 
@@ -345,7 +346,7 @@ namespace Tilausjarjestelma
 
         }
 
-        // Päivitä tuotekombo
+        // PÃ¤ivitÃ¤ tuotekombo
         private void PaivitaTuoteCombo()
         {
             PaivitaComboBox(
@@ -356,7 +357,7 @@ namespace Tilausjarjestelma
             );
         }
 
-        // Päivitä tuotekategoriakombo
+        // PÃ¤ivitÃ¤ tuotekategoriakombo
         private void PaivitaTuoteKategoriaCombo()
         {
             PaivitaComboBox(
@@ -382,7 +383,7 @@ namespace Tilausjarjestelma
             {
                 conn.Open();
 
-                // 1) Tarkista onko tuotetta käytetty tilauksissa
+                // 1) Tarkista onko tuotetta kÃ¤ytetty tilauksissa
                 using (SqlCommand checkCmd = new SqlCommand(
                     "SELECT COUNT(*) FROM OrderItems WHERE product_id = @id", conn))
                 {
@@ -392,7 +393,7 @@ namespace Tilausjarjestelma
                     if (kpl > 0)
                     {
                         MessageBox.Show(
-                            "Tuotetta ei voi poistaa, koska sitä on käytetty tilauksissa.\n" +
+                            "Tuotetta ei voi poistaa, koska sitÃ¤ on kÃ¤ytetty tilauksissa.\n" +
                             "Tuote tulee poistaa tilauksista ennen tuotteen poistamista.",
                             "Poisto estetty",
                             MessageBoxButton.OK,
@@ -402,7 +403,7 @@ namespace Tilausjarjestelma
                     }
                 }
 
-                // 2) Poista tuote jos sitä ei ole käytetty tilauksissa
+                // 2) Poista tuote jos sitÃ¤ ei ole kÃ¤ytetty tilauksissa
                 using (SqlCommand deleteCmd = new SqlCommand(
                     "DELETE FROM Products WHERE id = @id", conn))
                 {
@@ -411,7 +412,7 @@ namespace Tilausjarjestelma
                 }
             }
 
-            // Päivitä näkymät ja nollaa valinnat
+            // PÃ¤ivitÃ¤ nÃ¤kymÃ¤t ja nollaa valinnat
             Tuotteet_poista.SelectedIndex = -1;
             LisaaTuote_tuote.SelectedIndex = -1;
 
@@ -424,7 +425,7 @@ namespace Tilausjarjestelma
         }
 
         // Tilaukset
-        // Päivitä tilaus asiakaskombo
+        // PÃ¤ivitÃ¤ tilaus asiakaskombo
         private void PaivitaTilausAsiakasCombo()
         {
             PaivitaComboBox(
@@ -435,7 +436,7 @@ namespace Tilausjarjestelma
             );
         }
 
-        // Päivitä tilaus tuotekombo
+        // PÃ¤ivitÃ¤ tilaus tuotekombo
         private void PaivitaTilausTuoteCombo()
         {
             PaivitaComboBox(
@@ -456,7 +457,7 @@ namespace Tilausjarjestelma
 
         private List<TilausRivi> tilausRivit = new List<TilausRivi>();
 
-        // Lisää rivi tilaukseen
+        // LisÃ¤Ã¤ rivi tilaukseen
         private void Lisaa_rivi_Click(object sender, RoutedEventArgs e)
         {
             if (LisaaTilaus_asiakas.SelectedValue == null ||
@@ -468,7 +469,7 @@ namespace Tilausjarjestelma
 
             if (!int.TryParse(LisaaTuote_maara.Text, out int maara) || maara <= 0)
             {
-                MessageBox.Show("Määrän pitää olla positiivinen numero.");
+                MessageBox.Show("MÃ¤Ã¤rÃ¤n pitÃ¤Ã¤ olla positiivinen numero.");
                 return;
             }
 
@@ -491,7 +492,7 @@ namespace Tilausjarjestelma
                     {
                         if (!reader.Read())
                         {
-                            MessageBox.Show("Tuotetta ei löytynyt.");
+                            MessageBox.Show("Tuotetta ei lÃ¶ytynyt.");
                             return;
                         }
 
@@ -514,14 +515,14 @@ namespace Tilausjarjestelma
                         $"Varastossa ei ole tarpeeksi tuotetta.\n" +
                         $"Saatavilla: {saldo} kpl\n" +
                         $"Tilauksessa jo: {olemassaOleva.Maara} kpl",
-                        "Varastosaldo ei riitä",
+                        "Varastosaldo ei riitÃ¤",
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning
                     );
                     return;
                 }
 
-                // Päivitä olemassa olevan rivin määrä
+                // PÃ¤ivitÃ¤ olemassa olevan rivin mÃ¤Ã¤rÃ¤
                 olemassaOleva.Maara = uusiMaara;
             }
             else
@@ -531,7 +532,7 @@ namespace Tilausjarjestelma
                     MessageBox.Show(
                         $"Varastossa ei ole tarpeeksi tuotetta.\n" +
                         $"Saatavilla: {saldo} kpl",
-                        "Varastosaldo ei riitä",
+                        "Varastosaldo ei riitÃ¤",
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning
                     );
@@ -550,14 +551,14 @@ namespace Tilausjarjestelma
                 });
             }
 
-            // Päivitä tilauslista
+            // PÃ¤ivitÃ¤ tilauslista
             LisaaTilaus_lista.ItemsSource = null;
             LisaaTilaus_lista.ItemsSource = tilausRivit;
 
-            // Lukitse asiakas ensimmäisen rivin jälkeen
+            // Lukitse asiakas ensimmÃ¤isen rivin jÃ¤lkeen
             LisaaTilaus_asiakas.IsEnabled = false;
 
-            // Tyhjennä syötteet
+            // TyhjennÃ¤ syÃ¶tteet
             LisaaTuote_maara.Clear();
             LisaaTuote_tuote.SelectedIndex = -1;
         }
@@ -568,7 +569,7 @@ namespace Tilausjarjestelma
         {
             if (tilausRivit.Count == 0)
             {
-                MessageBox.Show("Lisää vähintään yksi rivi.");
+                MessageBox.Show("LisÃ¤Ã¤ vÃ¤hintÃ¤Ã¤n yksi rivi.");
                 return;
             }
 
@@ -628,7 +629,7 @@ namespace Tilausjarjestelma
                 catch (Exception ex)
                 {
                     tran.Rollback();
-                    MessageBox.Show("Tilauksen luonti epäonnistui:\n" + ex.Message);
+                    MessageBox.Show("Tilauksen luonti epÃ¤onnistui:\n" + ex.Message);
                     return;
                 }
             }
@@ -655,7 +656,7 @@ namespace Tilausjarjestelma
             );
         }
 
-        // Päivitä tilauksen rivit
+        // PÃ¤ivitÃ¤ tilauksen rivit
         private void PaivitaTilausRivit(int orderId)
         {
             string sql = $@"
@@ -783,7 +784,7 @@ namespace Tilausjarjestelma
                 }
             }
 
-            // Päivitä näkymät
+            // PÃ¤ivitÃ¤ nÃ¤kymÃ¤t
             int orderId = (int)TilausPoista_tilaus.SelectedValue;
             PaivitaTilausRivit(orderId);
             PaivitaVarastosaldoLista();
@@ -791,7 +792,7 @@ namespace Tilausjarjestelma
 
 
         // Varastosaldo
-        // Päivitä varastotuotekombo
+        // PÃ¤ivitÃ¤ varastotuotekombo
         private void PaivitaVarastoTuoteCombo()
         {
             PaivitaComboBox(
@@ -802,7 +803,7 @@ namespace Tilausjarjestelma
             );
         }
 
-        // Päivitä varastosaldo lista
+        // PÃ¤ivitÃ¤ varastosaldo lista
         private void PaivitaVarastosaldoLista()
         {
             PaivitaDataGrid(Varastosaldo_lista,
@@ -829,7 +830,7 @@ namespace Tilausjarjestelma
             }
         }
 
-        // Päivitä varastosaldo
+        // PÃ¤ivitÃ¤ varastosaldo
         private void Paivita_saldo_Click(object sender, RoutedEventArgs e)
         {
             if (Muokkaa_varastosaldo.SelectedValue == null)
@@ -870,7 +871,7 @@ namespace Tilausjarjestelma
             {
                 if (arvo > nykyinenSaldo)
                 {
-                    MessageBox.Show("Saldo ei voi mennä miinukselle!");
+                    MessageBox.Show("Saldo ei voi mennÃ¤ miinukselle!");
                     return;
                 }
                 uusiSaldo = nykyinenSaldo - arvo;
@@ -886,7 +887,7 @@ namespace Tilausjarjestelma
                 cmd.ExecuteNonQuery();
             }
 
-            // Päivitä näkymä
+            // PÃ¤ivitÃ¤ nÃ¤kymÃ¤
             NykyinenSaldo_varastosaldo.Text = $"Saldo = {uusiSaldo}";
             PaivitaVarastosaldoLista();
 
@@ -904,4 +905,6 @@ namespace Tilausjarjestelma
 
     }
 }
+
+
 
