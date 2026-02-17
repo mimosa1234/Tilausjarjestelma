@@ -27,9 +27,7 @@
                                   Margin="12"
                                   FontSize="14"
                                   Background="Transparent"
-                                  BorderThickness="0"
-                                  Controls:TabControlHelper.Underlined="True"
-                                  Controls:TabControlHelper.UnderlineSelectedBrush="#FF2F74D0">
+                                  BorderThickness="0">
             <TabItem Header="Asiakkaat">
                 <Grid Background="White" Margin="0,8,0,0">
                     <Label Content="Asiakkaan lisääminen:" HorizontalAlignment="Left" Margin="30,30,0,0" VerticalAlignment="Top"/>
